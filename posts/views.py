@@ -69,10 +69,10 @@ def post_view(request, username, post_id):
     ).filter(id=post_id).all()
     count = Post.objects.filter(author=profile_one_post).count()
     context = {
-               'profile_one_post': profile_one_post,
-               'item': item,
-               'postV': postV,
-               'count': count
+        'profile_one_post': profile_one_post,
+        'item': item,
+        'postV': postV,
+        'count': count
     }
     return render(request, 'post.html', context)
 
@@ -92,8 +92,8 @@ def post_edit(request, username, post_id):
             point.save()
         return redirect('posts:post', username=point.author, post_id=point.id)
     context = {
-               'form': form,
-               'author': author,
-               'point': point
+        'form': form,
+        'author': author,
+        'point': point
     }
     return render(request, 'new.html', context)

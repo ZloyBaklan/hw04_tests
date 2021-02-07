@@ -42,6 +42,14 @@ class YatubePostsURLTests(TestCase):
             'profile.html': '/TestAuthor/',
             'author.html': '/about/author/',
             'tech.html': '/about/tech/',
+        }
+        for template, url in templates_url_names.items():
+            with self.subTest():
+                response = self.authorized_client.get(url)
+                self.assertTemplateUsed(response, template)
+
+    def test_edit_uses_correct_template(self):
+        templates_url_names = {
             'new.html': '/TestAuthor/999/edit/',
         }
         for template, url in templates_url_names.items():
