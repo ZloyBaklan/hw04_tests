@@ -38,8 +38,13 @@ class YatubePostsTests(TestCase):
         templates_pages_names = {
             'index.html': reverse('posts:index'),
             'group.html': reverse('posts:group',
-                                  kwargs={'slug': 'TestG'}),
+                                  kwargs={'slug': self.group.slug}),
             'new.html': reverse('posts:new_post'),
+            'profile.html': reverse('posts:profile',
+                                    kwargs={'username': self.user.username}),
+            'post.html': reverse('posts:post',
+                                 kwargs={'username': self.user.username,
+                                         'post_id': self.post.id}),
         }
         for template, reverse_name in templates_pages_names.items():
             with self.subTest(reverse_name=reverse_name):
@@ -83,6 +88,22 @@ class YatubePostsTests(TestCase):
         main_page_view = response.context.get("page")
         self.assertIn(self.post, main_page_view)
 
+    def test_profile_page_show_correct_context(self):
+        """/<username>/. """
+        response = self.authorized_client.get(reverse(
+            'posts:profile', kwargs={'username': self.user.username})
+        )
+        post_text_0 = response.context.get('page')[0].text
+        post_group_0 = response.context.get('page')[0].group
+        post_author_0 = response.context.get('page')[0].author
+        post_pub_date_0 = response.context.get('page')[0].pub_date
+        author_username_0 = response.context.get('page')[0].author.username
+        self.assertEqual(post_text_0, 'Тестовый текст')
+        self.assertEqual(post_group_0.title, self.group.slug)
+        self.assertEqual(post_author_0, self.user)
+        self.assertEqual(post_pub_date_0, self.post.pub_date)
+        self.assertEqual(author_username_0, self.user.username)
+
 
 class PaginatorViewsTest(TestCase):
     @classmethod
@@ -104,3 +125,24 @@ class PaginatorViewsTest(TestCase):
     def test_second_page_containse_three_records(self):
         response = self.client.get(reverse('posts:index') + '?page=2')
         self.assertEqual(len(response.context.get('page').object_list), 3)
+
+class StaticViewsTests(TestCase):
+    def setUp(self):
+        self.guest_client = Client()
+        self.templates_pages_names = {
+            'author.html': reverse('about:author'),
+            'tech.html': reverse('about:tech')
+        }
+
+    def test_author_page_accessible_by_name(self):
+        for item in self.templates_pages_names.values():
+            with self.subTest():
+                response = self.guest_client.get(item)
+                self.assertEqual(response.status_code, 200)
+
+    def test_about_page_uses_correct_template(self):
+        for template, reverse_name in self.templates_pages_names.items():
+            with self.subTest(reverse_name=reverse_name):
+                response = self.guest_client.get(reverse_name)
+                self.assertTemplateUsed(response, template)
+
