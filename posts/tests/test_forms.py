@@ -44,7 +44,7 @@ class PostFormTests(TestCase):
         )
         '''Проверка работоспособности'''
         self.assertEqual(response.status_code, 200)
-    
+
     def test_post_edit_save(self):
         posts_count = Post.objects.count()
         post = Post.objects.get(id=self.post.id)

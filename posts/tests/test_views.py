@@ -126,6 +126,7 @@ class PaginatorViewsTest(TestCase):
         response = self.client.get(reverse('posts:index') + '?page=2')
         self.assertEqual(len(response.context.get('page').object_list), 3)
 
+
 class StaticViewsTests(TestCase):
     def setUp(self):
         self.guest_client = Client()
@@ -145,4 +146,3 @@ class StaticViewsTests(TestCase):
             with self.subTest(reverse_name=reverse_name):
                 response = self.guest_client.get(reverse_name)
                 self.assertTemplateUsed(response, template)
-
