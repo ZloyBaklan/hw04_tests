@@ -29,8 +29,8 @@ class YatubePostsURLTests(TestCase):
             ['profile.html', '/' + self.user.username + '/'],
             ['author.html', '/about/author/'],
             ['tech.html', '/about/tech/'],
-            ['new.html', '/' + self.user.username +
-             '/' + str(self.post.id) + '/' + 'edit/']
+            ['new.html', '/' + self.user.username
+             + '/' + str(self.post.id) + '/' + 'edit/']
         ]
 
     def test_urls_uses_correct_template(self):
@@ -51,6 +51,6 @@ class YatubePostsURLTests(TestCase):
                 + str(self.post.id) + '/' + 'edit/', follow=True
             )
             self.assertRedirects(
-                response, '/' + self.user.username +
-                '/' + str(self.post.id) + '/'
+                response, '/' + self.user.username
+                + '/' + str(self.post.id) + '/'
             )

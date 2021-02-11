@@ -40,8 +40,8 @@ class YatubePostsTests(TestCase):
             ['profile.html', '/' + self.user.username + '/'],
             ['author.html', '/about/author/'],
             ['tech.html', '/about/tech/'],
-            ['new.html', '/' + self.user.username +
-             '/' + str(self.post.id) + '/' + 'edit/']
+            ['new.html', '/' + self.user.username 
+             + '/' + str(self.post.id) + '/' + 'edit/']
         ]
 
     def test_group_page_show_correct_context(self):

@@ -78,8 +78,8 @@ class PostFormTests(TestCase):
             'group': self.group2.id,
         }
         self.authorized_client.post(reverse(
-            'posts:post_edit', args=[str(self.post.author), self.post.id]
-            ), data=form_data, follow=True
+            'posts:post_edit', args=[str(self.post.author), self.post.id]),
+            data=form_data, follow=True
         )
         self.assertNotEqual(
             self.post.text, Post.objects.get(id=self.post.id).text,
