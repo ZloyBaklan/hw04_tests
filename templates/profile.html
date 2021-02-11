@@ -1,16 +1,13 @@
 {% extends "base.html" %}
 {% block title %}
-  Записи автора {{profile.username}} 
+  Записи автора {{author_posts.username}} 
 {% endblock %}
 {% block header %}
-  {{profile}}
+  {{author_posts.username}}
 {% endblock %}
 
 
 {%block content%}
-
-<!doctype html>
-<html>
 <main role="main" class="container">
     <div class="row">
             <div class="col-md-3 mb-3 mt-1">
@@ -18,11 +15,11 @@
                             <div class="card-body">
                                     <div class="h2">
                                         <!-- Имя автора -->
-                                        {{profile.get_full_name}}
+                                        {{author_posts.get_full_name}}
                                     </div>
                                     <div class="h3 text-muted">
                                          <!-- username автора -->
-                                         @{{profile.username}}
+                                        <a href = "{% url 'posts:profile' author_posts.username %}" ><strong class="p-2 text-gray-dark">@{{author_posts.username}}</strong></a>
                                     </div>
                             </div>
                             <ul class="list-group list-group-flush">
@@ -35,7 +32,7 @@
                                     <li class="list-group-item">
                                             <div class="h6 text-muted">
                                                 <!-- Количество записей -->
-                                                Записей:{{count}}
+                                                Записей:{{page.paginator.count}}
                                             </div>
                                     </li>
                             </ul>
@@ -50,21 +47,21 @@
                             <div class="card-body">
                                     <p class="card-text">
                                             <!-- Ссылка на страницу автора в атрибуте href; username автора в тексте ссылки -->
-                                            <a href = "{% url 'posts:profile' profile.username %}" ><strong class="d-block text-gray-dark">@{{profile.username}}</strong></a>
+                                            <a href = "{% url 'posts:profile' author_posts.username %}" ><strong class="d-block text-gray-dark">@{{author_posts.username}}</strong></a>
                                             <!-- Текст поста -->
                                             <h1>{%if post.group != None %}
-                                            Группа: {{post.group}}
-                                            {% endif %}
+                                                Группа: <a href = "{% url 'posts:group' post.group.slug %}" >{{post.group}}</a>
+                                                {% endif %}
                                             </h1>
-                                            {{post.text}} 
+                                            {{post.text|linebreaksbr}} 
                                     </p>
                                     <div class="d-flex justify-content-between align-items-center">
                                             <div class="btn-group ">
                                                     <!-- Ссылка на страницу записи в атрибуте href-->
-                                                    <a class="btn btn-sm text-muted" href = "{% url 'posts:post' profile.username post.id %}" role="button">Добавить комментарий</a>
+                                                    <a class="btn btn-sm text-muted" href = "{% url 'posts:post' author_posts.username post.id %}" role="button">Добавить комментарий</a>
                                                     <!-- Ссылка на редактирование, показывается только автору записи -->
-                                                    {% if profile.is_authenticated and post %}
-                                                    <a class="btn btn-sm text-muted" href = "{% url 'posts:post_edit' profile.username post.id %}" role="button">Редактировать</a>
+                                                    {% if author_posts.is_authenticated and post.author == request.user %}
+                                                    <a class="btn btn-sm text-muted" href = "{% url 'posts:post_edit' author_posts.username post.id %}" role="button">Редактировать</a>
                                                     {% endif %}
                                             </div>
                                             <!-- Дата публикации  -->
@@ -81,7 +78,6 @@
      </div>
     </div>
 </main>
-</html>
 {% endblock %}
 
 

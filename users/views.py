@@ -1,9 +1,10 @@
-from django.shortcuts import render, redirect
-from django.views.generic import CreateView
-from django.urls import reverse_lazy
 from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
-from .forms import CreationForm, ContactForm
+from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
+from django.views.generic import CreateView
+
+from .forms import ContactForm, CreationForm
 
 
 class SignUp(CreateView):

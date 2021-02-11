@@ -1,68 +1,56 @@
-from django.test import TestCase, Client
-from posts.models import Group, User, Post
+from django.test import Client, TestCase
 
-
-class StaticURLTests(TestCase):
-    def setUp(self):
-        self.guest_client = Client()
-
-    def test_homepage(self):
-        '''Делаем запрос к главной странице и проверяем статус'''
-        response = self.guest_client.get('/')
-        self.assertEqual(response.status_code, 200)
+from posts.models import Group, Post, User
 
 
 class YatubePostsURLTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        Group.objects.create(
+        cls.user = User.objects.create(username='TestAuthor')
+        cls.group = Group.objects.create(
             slug='testgroup',
         )
-
         cls.post = Post.objects.create(
-            id=999,
             text='Тестовый текст',
-            author=User.objects.create(username='TestAuthor'),
+            author=cls.user,
         )
 
     def setUp(self):
         self.guest_client = Client()
-        self.user = User.objects.get(username='TestAuthor')
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
+        self.template_urls_names = [
+            ['index.html', '/'],
+            ['new.html', '/new/'],
+            ['group.html', '/group/' + self.group.slug + '/'],
+            ['post.html',
+                '/' + self.user.username + '/' + str(self.post.id) + '/'],
+            ['profile.html', '/' + self.user.username + '/'],
+            ['author.html', '/about/author/'],
+            ['tech.html', '/about/tech/'],
+            ['new.html', '/' + self.user.username +
+             '/' + str(self.post.id) + '/' + 'edit/']
+        ]
 
     def test_urls_uses_correct_template(self):
-        """URL-адрес использует соответствующий шаблон."""
-        templates_url_names = {
-            'index.html': '/',
-            'new.html': '/new/',
-            'group.html': '/group/testgroup/',
-            'post.html': '/TestAuthor/999/',
-            'profile.html': '/TestAuthor/',
-            'author.html': '/about/author/',
-            'tech.html': '/about/tech/',
-        }
-        for template, url in templates_url_names.items():
-            with self.subTest():
+        for template, url in self.template_urls_names:
+            with self.subTest(url=url):
                 response = self.authorized_client.get(url)
                 self.assertTemplateUsed(response, template)
-
-    def test_edit_uses_correct_template(self):
-        templates_url_names = {
-            'new.html': '/TestAuthor/999/edit/',
-        }
-        for template, url in templates_url_names.items():
-            with self.subTest():
-                response = self.authorized_client.get(url)
-                self.assertTemplateUsed(response, template)
+                self.assertEqual(response.status_code, 200)
 
     def test_redirect(self):
-        response = self.guest_client.get('/new/', follow=True)
-        self.assertRedirects(response, '/auth/login/?next=/new/')
-
-        if self.user != User.objects.get(username='TestAuthor'):
+        response_index = self.guest_client.get('/')
+        self.assertEqual(response_index.status_code, 200)
+        response_new = self.guest_client.get('/new/', follow=True)
+        self.assertRedirects(response_new, '/auth/login/?next=/new/')
+        if self.user != User.objects.get(username=self.user.username):
             response = self.authorized_client.get(
-                '/TestAuthor/999/edit/', follow=True
+                '/' + self.user.username + '/'
+                + str(self.post.id) + '/' + 'edit/', follow=True
             )
-            self.assertRedirects(response, '/TestAuthor/999/')
+            self.assertRedirects(
+                response, '/' + self.user.username +
+                '/' + str(self.post.id) + '/'
+            )

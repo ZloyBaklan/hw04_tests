@@ -16,7 +16,10 @@
     {% include 'nav.html' %}
     <main>
         <div class="container">
-            
+            {% block header %}
+            <!--Переопределение наследников-->
+            {% endblock %}
+
             {% block content %}
             <!-- Содержимое страницы -->
             {% endblock %}

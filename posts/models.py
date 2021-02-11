@@ -1,7 +1,7 @@
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.db import models
+
 from pytils.translit import slugify
-from users.validators import validate_not_empty
 
 User = get_user_model()
 
@@ -27,20 +27,15 @@ class Group(models.Model):
 
 
 class Post(models.Model):
-    text = models.TextField(verbose_name="Текст поста",
-                            validators=[validate_not_empty])
+    text = models.TextField(verbose_name="Текст поста")
     pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE,
                                verbose_name="Автор поста",
                                related_name="post_author")
-    '''
-    Возможность в посте ссылаться на группу.
-    Чтобы пост не пропал при удалении группы задаем SET_NULL.
-    '''
     group = models.ForeignKey(Group, on_delete=models.SET_NULL,
                               verbose_name="Тег группы",
                               related_name="posts", blank=True, null=True,
-                              help_text="Ссылка на группу")
+                              help_text="Ключ для построения ссылки")
 
     class Meta:
         ordering = ["-pub_date"]

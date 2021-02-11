@@ -20,7 +20,6 @@ from django.urls import include, path
 Импорт правил из приложений posts, admin, users
 ( Если правила в этом приложении не найдены, обращаемся к django.contrib...)
 '''
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", include("posts.urls", namespace='posts')),

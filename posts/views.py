@@ -1,13 +1,16 @@
-from django.shortcuts import render, get_object_or_404, redirect, reverse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from .models import Post, Group, User
+
+from yatube.settings import postsconstant
+
+from .models import Group, Post, User
 from .forms import PostForm
 
 
 def index(request):
     post_list = Post.objects.all()
-    paginator = Paginator(post_list, 10)
+    paginator = Paginator(post_list, postsconstant)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     context = {
@@ -20,7 +23,7 @@ def index(request):
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
     posts = group.posts.all()
-    paginator = Paginator(posts, 10)
+    paginator = Paginator(posts, postsconstant)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     context = {
@@ -36,43 +39,36 @@ def group_posts(request, slug):
 @login_required
 def new_post(request):
     form = PostForm(request.POST or None)
-    if request.method == 'POST':
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.save()
-            return redirect(reverse('posts:index'))
+    if form.is_valid():
+        post = form.save(commit=False)
+        post.author = request.user
+        post.save()
+        return redirect('posts:index')
     return render(request, 'new.html', {'form': form})
 
 
 def profile(request, username):
-    profile = get_object_or_404(User, username=username)
-    posts = Post.objects.filter(author=profile).all()
-    paginator = Paginator(posts, 10)
+    author_posts = get_object_or_404(User, username=username)
+    posts = author_posts.post_author.all()
+    paginator = Paginator(posts, postsconstant)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
-    count = Post.objects.filter(author=profile).count()
     context = {
-        'profile': profile,
+        'author_posts': author_posts,
         'paginator': paginator,
         'page': page,
-        'count': count,
     }
     return render(request, 'profile.html', context)
 
 
 def post_view(request, username, post_id):
-    profile_one_post = get_object_or_404(User, username=username)
-    item = get_object_or_404(Post, id=post_id)
-    postV = Post.objects.filter(
-        author=profile_one_post
-    ).filter(id=post_id).all()
-    count = Post.objects.filter(author=profile_one_post).count()
+    author_one_post = get_object_or_404(User, username=username)
+    post_V = author_one_post.post_author.all()
+    post = get_object_or_404(Post, id=post_id, author=author_one_post)
     context = {
-        'profile_one_post': profile_one_post,
-        'item': item,
-        'postV': postV,
-        'count': count
+        'author_one_post': author_one_post,
+        'post': post,
+        'post_V': post_V,
     }
     return render(request, 'post.html', context)
 
@@ -80,20 +76,14 @@ def post_view(request, username, post_id):
 @login_required
 def post_edit(request, username, post_id):
     author = get_object_or_404(User, username=username)
-    point = get_object_or_404(Post, id=post_id, author=request.user)
-    if request.method == 'GET':
-        form = PostForm(instance=point)
-    if request.method == 'POST':
-        form = PostForm(request.POST, instance=point)
-        if form.is_valid():
-            edit_point = form.save(commit=False)
-            point.text = edit_point.text
-            point.group = edit_point.group
-            point.save()
-        return redirect('posts:post', username=point.author, post_id=point.id)
+    post = Post.objects.get(id=post_id, author=request.user)
+    form = PostForm(request.POST or None, instance=post)
+    if form.is_valid():
+        form.save()
+        return redirect('posts:post', username=post.author, post_id=post.id)
     context = {
         'form': form,
         'author': author,
-        'point': point
+        'post': post
     }
     return render(request, 'new.html', context)

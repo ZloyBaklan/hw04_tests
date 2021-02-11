@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}
-{% if not point %}Добавить запись {% else %} Редактировать запись {% endif %}
+{% if not post %}Добавить запись {% else %} Редактировать запись {% endif %}
 {% endblock %}
 {% block content %}
 {% load user_filters %}
@@ -8,7 +8,7 @@
 <div class="row justify-content-center">
     <div class="col-md-8 p-5">
         <div class="card">
-            <div class="card-header">{% if not point %} Добавить запись {% else %} Редактировать запись {% endif %}</div>
+            <div class="card-header">{% if not post %} Добавить запись {% else %} Редактировать запись {% endif %}</div>
             <div class="card-body">
 
                 {% for error in form.errors %}
@@ -16,7 +16,7 @@
                           {{ error|escape }}
                         </div>
                     {% endfor %}
-                    <form method="post" action={% if point %}"{% url 'posts:post_edit' username=point.author post_id=point.id %}"{% else %}"{% url 'posts:new_post' %}"{% endif %}>
+                    <form method="post" {% if post %}"{% url 'posts:post_edit' username=post.author post_id=post.id %}"{% else %}"{% url 'posts:new_post' %}"{% endif %}>
                     {% csrf_token %}
                   
                    
@@ -36,7 +36,7 @@
                 {% endfor %}
                 <div class="col-md-6 offset-md-4">              
                     <button type="submit" class="btn btn-primary">
-                        {% if point %} Сохранить {% else %} Добавить {% endif %}
+                        {% if post %} Сохранить {% else %} Добавить {% endif %}
                     </button>
                 </div>
             </div> <!-- card body -->

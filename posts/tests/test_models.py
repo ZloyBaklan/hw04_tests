@@ -1,5 +1,6 @@
 from django.test import TestCase
-from posts.models import Post, Group, User
+
+from posts.models import Group, Post, User
 
 
 class YatubePostsTest(TestCase):
@@ -7,16 +8,16 @@ class YatubePostsTest(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         '''Создание тестовых записей в БД'''
+        cls.user = User.objects.create(username='Тестовый автор')
         cls.group = Group.objects.create(
             title='Тестовое название группы',
             slug='Тестовая ссылка группы',
             description='Описание тестовой группы',
         )
-
         cls.post = Post.objects.create(
             text='Тестовый текст',
-            author=User.objects.create(username='Тестовый автор'),
-            group=Group.objects.create(title='Тестовая ссылка на группу'),
+            author=cls.user,
+            group=cls.group,
         )
 
     def test_verbose_name(self):
@@ -31,7 +32,6 @@ class YatubePostsTest(TestCase):
             with self.subTest(value=value):
                 self.assertEqual(
                     post._meta.get_field(value).verbose_name, expected)
-
         group = YatubePostsTest.group
         field_verboses = {
             'title': 'Название группы',
@@ -47,13 +47,12 @@ class YatubePostsTest(TestCase):
         """help_text в полях совпадает с ожидаемым."""
         post = YatubePostsTest.post
         field_help_texts = {
-            'group': 'Ссылка на группу'
+            'group': 'Ключ для построения ссылки'
         }
         for value, expected in field_help_texts.items():
             with self.subTest(value=value):
                 self.assertEqual(
                     post._meta.get_field(value).help_text, expected)
-
         group = YatubePostsTest.group
         field_help_texts = {
             'slug': 'Задайте ссылку на вашу группу'
@@ -63,7 +62,6 @@ class YatubePostsTest(TestCase):
                 self.assertEqual(
                     group._meta.get_field(value).help_text, expected)
 
-    #  и возвраты в models title text
     def test_object_name_is_title_field(self):
         '''__str__  group - строка с group.title.'''
         group = YatubePostsTest.group

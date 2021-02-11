@@ -13,11 +13,11 @@
     Записи сообщества {{group.title}}
   </h1>
  <p>
-   {{group.description}}
+   {{group.description|linebreaksbr}}
  </p>
   {% for post in page %}
   <h1>
-    Автор: {{post.author}}, Дата публикации: {{post.pub_date|date:"d M Y"}}
+    Автор: {{post.author.username}}, Дата публикации: {{post.pub_date|date:"d M Y"}}
   </h1>
   <p>
     {{post.text|linebreaksbr}}
