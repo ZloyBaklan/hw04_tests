@@ -40,7 +40,7 @@ class YatubePostsTests(TestCase):
             ['profile.html', '/' + self.user.username + '/'],
             ['author.html', '/about/author/'],
             ['tech.html', '/about/tech/'],
-            ['new.html', '/' + self.user.username 
+            ['new.html', '/' + self.user.username
              + '/' + str(self.post.id) + '/' + 'edit/']
         ]
 
