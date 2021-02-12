@@ -7,7 +7,7 @@
   {% for post in page %}
   <h3>
       Автор: {{ post.author.get_full_name }},
-      <a href = "{% url 'posts:profile' post.author %}" ><strong class="d-block text-gray-dark">@{{post.author}}</strong></a>
+      <a href = "{% url 'posts:profile' post.author.username %}" ><strong class="d-block text-gray-dark">@{{post.author.username}}</strong></a>
       Дата публикации: {{ post.pub_date|date:"d M Y" }} </br>
       {%if post.group != None %}
       Группа: <a href = "{% url 'posts:group' post.group.slug %}" >{{post.group}}</a>
@@ -17,6 +17,7 @@
   <p>
       {{ post.text|linebreaksbr }}
   </p>
+  <a href = "{% url 'posts:post' post.author.username post.id %}" >Посмотреть</a>
   {% if not forloop.last %}
   <hr>
   {% endif %}

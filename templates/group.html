@@ -17,7 +17,9 @@
  </p>
   {% for post in page %}
   <h1>
-    Автор: {{post.author.username}}, Дата публикации: {{post.pub_date|date:"d M Y"}}
+    Автор: {{post.author.username}}, 
+    <a href = "{% url 'posts:profile' post.author.username %}" ><strong class="d-block text-gray-dark">@{{post.author.username}}</strong></a>  
+    Дата публикации: {{post.pub_date|date:"d M Y"}}  
   </h1>
   <p>
     {{post.text|linebreaksbr}}

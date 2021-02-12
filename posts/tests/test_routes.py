@@ -18,23 +18,45 @@ class SlugTests(TestCase):
         self.authorized_client.force_login(self.user)
         '''Проверка используемых шаблонов'''
         self.templates_pages_names = [
-            ['index.html', reverse('posts:index')],
-            ['author.html', reverse('about:author')],
-            ['tech.html', reverse('about:tech')],
-            ['group.html', reverse(
-                'posts:group', kwargs={'slug': self.group.slug}
-            )],
-            ['profile.html', reverse(
-                'posts:profile', kwargs={'username': self.user.username}
-            )],
-            ['post.html', reverse('posts:post',
-                                  kwargs={'username': self.user.username,
-                                          'post_id': self.post.id})],
+            [
+                '/',
+                reverse('posts:index')
+            ],
+            [
+                '/about/author/',
+                reverse('about:author')
+            ],
+            [
+                '/about/tech/',
+                reverse('about:tech')
+            ],
+            [
+                '/new/',
+                reverse('posts:new_post')
+            ],
+            [
+                '/group/' + self.group.slug + '/',
+                reverse('posts:group', kwargs={'slug': self.group.slug})
+            ],
+            [
+                '/' + self.user.username + '/',
+                reverse('posts:profile', kwargs={'username':
+                                                 self.user.username})
+            ],
+            [
+                '/' + self.user.username + '/' + str(self.post.id) + '/',
+                reverse('posts:post', kwargs={'username': self.user.username,
+                                              'post_id': self.post.id})
+            ],
+            [
+                '/' + self.user.username
+                + '/' + str(self.post.id) + '/' + 'edit/',
+                reverse('posts:post_edit',
+                        kwargs={'username': self.user.username,
+                                'post_id': self.post.id})
+            ]
         ]
 
-    def test_page_uses_correct_template(self):
-        for template, reverse_name in self.templates_pages_names:
-            with self.subTest(reverse_name=reverse_name):
-                response = self.guest_client.get(reverse_name)
-                self.assertTemplateUsed(response, template)
-                self.assertEqual(response.status_code, 200)
+    def test_page_uses_correct_reverse(self):
+        for reverse_name in self.templates_pages_names:
+            self.assertTemplateUsed(reverse_name)

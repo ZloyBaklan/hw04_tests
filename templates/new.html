@@ -16,7 +16,7 @@
                           {{ error|escape }}
                         </div>
                     {% endfor %}
-                    <form method="post" {% if post %}"{% url 'posts:post_edit' username=post.author post_id=post.id %}"{% else %}"{% url 'posts:new_post' %}"{% endif %}>
+                    <form method="post">
                     {% csrf_token %}
                   
                    

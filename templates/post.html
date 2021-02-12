@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block title %}
-  Просмотр записи автора {{author_one_post.username}} 
+  Просмотр записи автора {{author.username}} 
 {% endblock %}
 {% block header %}
-  {{author_one_post.username}}
+  {{author.username}}
 {% endblock %}
 
 
@@ -15,11 +15,11 @@
                         <div class="card-body">
                                 <div class="h2">
                                     <!-- Имя автора -->
-                                    {{author_one_post.get_full_name}} 
+                                    {{author.get_full_name}} 
                                 </div>
                                 <div class="h3 text-muted">
                                      <!-- username автора -->
-                                     <a href = "{% url 'posts:profile' author_one_post.username %}" ><strong class="p-2 text-gray-dark">@{{author_one_post.username}}</strong></a>
+                                     <a href = "{% url 'posts:profile' author.username %}" ><strong class="p-2 text-gray-dark">@{{author.username}}</strong></a>
                                 </div>
                         </div>
                         <ul class="list-group list-group-flush">
@@ -32,7 +32,7 @@
                                 <li class="list-group-item">
                                         <div class="h6 text-muted">
                                             <!--Во view нет вызова всех постов без ограничительного фильтра-->    
-                                            Записей:{{post_V.count}}
+                                            Записей:{{author.posts.count}}
                                         </div>
                                 </li>
                         </ul>
@@ -42,12 +42,12 @@
         <div class="col-md-9">
 
             <!-- Пост -->
-            {% if post in post_V %} 
+
                 <div class="card mb-3 mt-1 shadow-sm">
                         <div class="card-body">
                                 <p class="card-text">
                                         <!-- Ссылка на страницу автора в атрибуте href; username автора в тексте ссылки -->
-                                        <a href="{% url 'posts:post' author_one_post.username post.id %}"><strong class="d-block text-gray-dark">@{{author_one_post.username}}</strong></a>
+                                        <a href="{% url 'posts:post' author.username post.id %}"><strong class="d-block text-gray-dark">@{{author.username}}</strong></a>
                                         <h1>{%if post.group != None %}
                                                 Группа: <a href = "{% url 'posts:group' post.group.slug %}" >{{post.group}}</a>
                                                 {% endif %}
@@ -57,8 +57,8 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                         <div class="btn-group ">
                                                 <!-- Ссылка на редактирование, показывается только автору записи -->
-                                                {% if author_one_post.is_authenticated and author_one_post == request.user %}
-                                                <a class="btn btn-sm text-muted" href="{% url 'posts:post_edit' author_one_post.username post.id%}" role="button">Редактировать</a>
+                                                {% if author.is_authenticated and author == request.user %}
+                                                <a class="btn btn-sm text-muted" href="{% url 'posts:post_edit' author.username post.id%}" role="button">Редактировать</a>
                                                 {% endif %}
                                         </div>
                                         <!-- Дата публикации  -->
@@ -66,7 +66,6 @@
                                 </div>
                         </div>
                 </div>
-              {% endif %}
         </div>
      </div>
     </div>

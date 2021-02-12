@@ -5,19 +5,19 @@ from . import views
 app_name = 'posts'
 urlpatterns = [
     path(
-        "",
+        '',
         views.index,
-        name="index"
+        name='index'
     ),
     path(
-        "new/",
+        'new/',
         views.new_post,
-        name="new_post"
+        name='new_post'
     ),
     path(
-        "group/<slug:slug>/",
+        'group/<slug:slug>/',
         views.group_posts,
-        name="group"
+        name='group'
     ),
     path(
         '<str:username>/',
