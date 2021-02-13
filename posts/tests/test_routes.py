@@ -1,10 +1,10 @@
-from django.test import Client, TestCase
+from django.test import TestCase
 from django.urls import reverse
 
 from posts.models import Group, Post, User
 
 
-class SlugTests(TestCase):
+class ReverseTests(TestCase):
     def setUp(self):
         self.user = User.objects.create(username='TestAuthor')
         self.group = Group.objects.create(slug='testgroup',)
@@ -13,11 +13,7 @@ class SlugTests(TestCase):
             author=self.user,
             group=self.group,
         )
-        self.guest_client = Client()
-        self.authorized_client = Client()
-        self.authorized_client.force_login(self.user)
-        '''Проверка используемых шаблонов'''
-        self.templates_pages_names = [
+        self.urls_names = [
             [
                 '/',
                 reverse('posts:index')
@@ -35,28 +31,24 @@ class SlugTests(TestCase):
                 reverse('posts:new_post')
             ],
             [
-                '/group/' + self.group.slug + '/',
-                reverse('posts:group', kwargs={'slug': self.group.slug})
+                f'/group/{self.group.slug}/',
+                reverse('posts:group', args=[self.group.slug])
             ],
             [
-                '/' + self.user.username + '/',
-                reverse('posts:profile', kwargs={'username':
-                                                 self.user.username})
+                f'/{self.user.username}/',
+                reverse('posts:profile', args=[self.user.username])
             ],
             [
-                '/' + self.user.username + '/' + str(self.post.id) + '/',
-                reverse('posts:post', kwargs={'username': self.user.username,
-                                              'post_id': self.post.id})
+                f'/{self.user.username}/{str(self.post.id)}/',
+                reverse('posts:post', args=[self.user.username, self.post.id])
             ],
             [
-                '/' + self.user.username
-                + '/' + str(self.post.id) + '/' + 'edit/',
+                f'/{self.user.username}/{str(self.post.id)}/edit/',
                 reverse('posts:post_edit',
-                        kwargs={'username': self.user.username,
-                                'post_id': self.post.id})
+                        args=[self.user.username, self.post.id])
             ]
         ]
 
-    def test_page_uses_correct_reverse(self):
-        for reverse_name in self.templates_pages_names:
-            self.assertTemplateUsed(reverse_name)
+    def test_url_uses_correct_reverse(self):
+        for direct_url, reversed_url in self.urls_names:
+            self.assertEquals(direct_url, reversed_url)

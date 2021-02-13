@@ -6,8 +6,7 @@
 {% block content %}
   {% for post in page %}
   <h3>
-      Автор: {{ post.author.get_full_name }},
-      <a href = "{% url 'posts:profile' post.author.username %}" ><strong class="d-block text-gray-dark">@{{post.author.username}}</strong></a>
+      Автор:<a href = "{% url 'posts:profile' post.author.username %}" ><strong class="d-block text-gray-dark">{{post.author.username}}</strong></a>
       Дата публикации: {{ post.pub_date|date:"d M Y" }} </br>
       {%if post.group != None %}
       Группа: <a href = "{% url 'posts:group' post.group.slug %}" >{{post.group}}</a>

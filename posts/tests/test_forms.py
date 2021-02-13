@@ -4,8 +4,8 @@ from django.urls import reverse
 
 from posts.models import Group, Post, User
 
-REVERSE_INDEX = reverse('posts:index')
-REVERSE_NEW_POST = reverse('posts:new_post')
+INDEX = reverse('posts:index')
+NEW_POST = reverse('posts:new_post')
 
 
 class PostFormTests(TestCase):
@@ -28,9 +28,12 @@ class PostFormTests(TestCase):
             text='Тестовый текст',
             group=cls.group
         )
-        cls.reverse_post_edit = reverse('posts:post',
-                                        kwargs={'username': cls.user.username,
-                                                'post_id': cls.post.id})
+        cls.POST_URL = reverse(
+            'posts:post',
+            args=[cls.user.username, cls.post.id])
+        cls.POST_EDIT_URL = reverse(
+            'posts:post_edit',
+            args=[cls.user.username, cls.post.id])
 
     def setUp(self):
         self.authorized_client = Client()
@@ -38,24 +41,24 @@ class PostFormTests(TestCase):
 
     def test_post_create(self):
         form_data = {
-            'text': 'Текст поста из формы',
-            'group': self.group.id,
+            'text': self.post.text,
+            'group': self.group.slug,
         }
         response = self.authorized_client.post(
-            REVERSE_NEW_POST,
+            NEW_POST,
             data=form_data,
             follow=True
         )
-        self.assertRedirects(response, REVERSE_INDEX)
-        '''Проверка по автору(автор не может быть изменен)'''
-        self.assertTrue(Post.objects.filter(author=self.post.author).exists())
+        post = Post.objects.first()
+        self.assertEqual(post.text, form_data['text'])
+        self.assertEqual(post.group.slug, form_data['group'])
         '''Проверка работоспособности'''
         self.assertEqual(response.status_code, 200)
 
     def test_new_post_show_correct_context(self):
         """Шаблон new_post сформирован с правильным контекстом."""
-        response = self.authorized_client.get(REVERSE_NEW_POST
-                                              or self.reverse_post_edit)
+        response = self.authorized_client.get(NEW_POST
+                                              or self.POST_EDIT_URL)
         form_fields = {
             'text': forms.fields.CharField,
             'group': forms.fields.Field,
@@ -64,20 +67,19 @@ class PostFormTests(TestCase):
             with self.subTest(value=value):
                 form_field = response.context.get('form').fields.get(value)
                 self.assertIsInstance(form_field, expected)
-        """Корректное отображение /<username>/<post_id>/edit/. """
 
+    """Корректное отображение /<username>/<post_id>/edit/. """
     def test_post_edit_save(self):
-        posts_count = Post.objects.count()
         form_data = {
             'text': 'Другой текст!',
             'group': self.group2.id,
         }
-        self.authorized_client.post(
-            self.reverse_post_edit,
+        response = self.authorized_client.post(
+            self.POST_EDIT_URL,
             data=form_data, follow=True
         )
-        '''id поста автора не должен поменяться'''
-        self.assertEqual(
-            self.post.id, Post.objects.get(author=self.post.author).id,
-        )
-        self.assertEqual(Post.objects.count(), posts_count)
+        '''Пост должен поменяться'''
+        post = response.context['post']
+        self.assertEqual(post.text, form_data['text'])
+        self.assertEqual(post.group, self.group2)
+        self.assertRedirects(response, self.POST_URL)
