@@ -49,7 +49,7 @@ class YatubePostsTests(TestCase):
         group_test = response_group.context.get('group')
         self.assertEqual(group_test, self.group)
 
-    def test_group_index_profile_post_in(self):
+    def test_post_in_url(self):
         urls_names = [
             GROUP,
             INDEX,
@@ -58,11 +58,13 @@ class YatubePostsTests(TestCase):
         for value in urls_names:
             with self.subTest(value=value):
                 response = self.authorized_client.get(value)
-                page_view = response.context.get('page')[0]
-                self.assertEqual(self.post, page_view)
+                self.assertEqual(self.post.id, 
+                                 response.context.get('page')[0].id)
+                self.assertEqual(self.post.author, 
+                                 response.context.get('page')[0].author)
 
-    def test_post_in_right_group(self):
-        """Пост находится в нужной группе"""
+    def test_post_not_in_group2(self):
+        """Пост не отображается в другой группе"""
         response_group = self.authorized_client.get(GROUP2)
         posts_in_group = response_group.context.get('page')
         self.assertNotIn(self.post, posts_in_group)
@@ -71,6 +73,7 @@ class YatubePostsTests(TestCase):
         """Проверка отображения /<username>/<post_id>/. """
         response = self.authorized_client.get(self.REVERSE_POST)
         self.assertEqual(self.post, response.context.get('post'))
+        self.assertEqual(self.post.author, response.context.get('post').author)
 
 
 class PaginatorViewsTest(TestCase):

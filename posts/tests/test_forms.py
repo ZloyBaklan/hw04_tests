@@ -41,32 +41,36 @@ class PostFormTests(TestCase):
 
     def test_post_create(self):
         form_data = {
-            'text': self.post.text,
-            'group': self.group.slug,
+            'text': 'Текст формы',
+            'group': self.group.id,
         }
         response = self.authorized_client.post(
             NEW_POST,
             data=form_data,
             follow=True
         )
-        post = Post.objects.first()
+        post = response.context['page'][0]
         self.assertEqual(post.text, form_data['text'])
-        self.assertEqual(post.group.slug, form_data['group'])
-        '''Проверка работоспособности'''
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(post.group, self.group)
+        self.assertEqual(post.author, self.post.author)
+        self.assertRedirects(response, INDEX)
 
     def test_new_post_show_correct_context(self):
         """Шаблон new_post сформирован с правильным контекстом."""
-        response = self.authorized_client.get(NEW_POST
-                                              or self.POST_EDIT_URL)
-        form_fields = {
-            'text': forms.fields.CharField,
-            'group': forms.fields.Field,
-        }
-        for value, expected in form_fields.items():
-            with self.subTest(value=value):
-                form_field = response.context.get('form').fields.get(value)
-                self.assertIsInstance(form_field, expected)
+        urls =[
+            NEW_POST,
+            self.POST_EDIT_URL
+        ]
+        for url in urls:
+            response = self.authorized_client.get(url)
+            form_fields = {
+                'text': forms.fields.CharField,
+                'group': forms.fields.Field,
+            }
+            for value, expected in form_fields.items():
+                with self.subTest(value=value):
+                    form_field = response.context.get('form').fields.get(value)
+                    self.assertIsInstance(form_field, expected)
 
     """Корректное отображение /<username>/<post_id>/edit/. """
     def test_post_edit_save(self):
@@ -82,4 +86,5 @@ class PostFormTests(TestCase):
         post = response.context['post']
         self.assertEqual(post.text, form_data['text'])
         self.assertEqual(post.group, self.group2)
+        self.assertEqual(post.author, self.post.author)
         self.assertRedirects(response, self.POST_URL)

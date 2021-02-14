@@ -52,33 +52,56 @@ class YatubePostsURLTests(TestCase):
                 self.assertTemplateUsed(self.authorized_client.get(url),
                                         template)
 
-    def test_urls_200(self):
-        template_urls_names = [
-            INDEX,
-            NEW_POST,
-            GROUP_URL,
-            self.POST_URL,
-            PROFILE_URL,
-            AUTHOR,
-            TECH,
-            self.POST_EDIT_URL
+    def test_urls_status_code(self):
+        get_urls_names = [
+            [
+                INDEX, self.guest_client, 200
+            ],
+            [
+                NEW_POST, self.guest_client, 302
+            ],
+            [
+                GROUP_URL, self.guest_client, 200
+            ],
+            [
+                self.POST_URL, self.guest_client, 200
+            ],
+            [
+                PROFILE_URL, self.guest_client, 200
+            ],
+            [
+                AUTHOR, self.guest_client, 200
+            ],
+            [
+                TECH, self.guest_client, 200
+            ],
+            [
+                self.POST_EDIT_URL, self.guest_client, 302
+            ],
+            [
+                self.POST_EDIT_URL, self.authorized_client, 200
+            ],
+            [
+                NEW_POST, self.authorized_client, 200
+            ],
         ]
-        for value in template_urls_names:
-            with self.subTest(value=value):
-                response = self.authorized_client.get(value)
-                self.assertEqual(response.status_code, 200)
+        for url, client, status in get_urls_names:
+            with self.subTest(url=url):
+                self.assertEqual(client.get(url).status_code, status)
 
     def test_redirect_urls_correct(self):
-        guest_urls = [
-            NEW_POST,
-            self.POST_EDIT_URL,
+        urls = [
+            [
+                NEW_POST,
+                self.guest_client.get(NEW_POST, follow=True),
+                f'{AUTH_LOGIN}?next={NEW_POST}'
+            ],
+            [
+                self.POST_EDIT_URL,
+                self.guest_client.get(self.POST_EDIT_URL, follow=True),
+                f'{AUTH_LOGIN}?next={self.POST_EDIT_URL}'
+            ],
         ]
-        for value in guest_urls:
-            with self.subTest(value=value):
-                response = self.guest_client.get(value, follow=True)
-                self.assertRedirects(response, f'{AUTH_LOGIN}?next={value}')
-        if self.user != User.objects.get(username=self.user.username):
-            response = self.authorized_client.get(
-                self.POST_EDIT_URL, follow=True
-            )
-            self.assertRedirects(response, self.POST_URL)
+        for url, client, redirect in urls:
+            with self.subTest(url=url):
+                self.assertRedirects(client, redirect)
