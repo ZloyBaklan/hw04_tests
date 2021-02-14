@@ -57,7 +57,7 @@ class PostFormTests(TestCase):
 
     def test_new_post_show_correct_context(self):
         """Шаблон new_post сформирован с правильным контекстом."""
-        urls =[
+        urls = [
             NEW_POST,
             self.POST_EDIT_URL
         ]

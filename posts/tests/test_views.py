@@ -58,9 +58,9 @@ class YatubePostsTests(TestCase):
         for value in urls_names:
             with self.subTest(value=value):
                 response = self.authorized_client.get(value)
-                self.assertEqual(self.post.id, 
+                self.assertEqual(self.post.id,
                                  response.context.get('page')[0].id)
-                self.assertEqual(self.post.author, 
+                self.assertEqual(self.post.author,
                                  response.context.get('page')[0].author)
 
     def test_post_not_in_group2(self):
