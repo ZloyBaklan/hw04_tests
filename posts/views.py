@@ -72,6 +72,8 @@ def post_view(request, username, post_id):
 
 @login_required
 def post_edit(request, username, post_id):
+    if not request.user.username == username:
+        return redirect('posts:post', username, post_id)
     post = Post.objects.get(id=post_id, author=request.user)
     form = PostForm(request.POST or None, instance=post)
     if form.is_valid():

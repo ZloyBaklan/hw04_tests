@@ -28,20 +28,20 @@ class YatubePostsTests(TestCase):
             slug=SLUG2,
             description="В этой группе нет постов",
         )
-        cls.post = Post.objects.create(
-            text='Тестовый текст',
-            author=cls.user,
-            group=cls.group,
-        )
-        cls.REVERSE_POST = reverse(
-            'posts:post',
-            kwargs={'username': cls.user.username, 'post_id': cls.post.id}
-        )
 
     def setUp(self):
         self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
+        self.post = Post.objects.create(
+            text='Тестовый текст',
+            author=self.user,
+            group=self.group,
+        )
+        self.REVERSE_POST = reverse(
+            'posts:post',
+            kwargs={'username': self.user.username, 'post_id': self.post.id}
+        )
 
     def test_group_page_show_correct_context(self):
         """Отображение страницы группы"""
@@ -58,22 +58,25 @@ class YatubePostsTests(TestCase):
         for value in urls_names:
             with self.subTest(value=value):
                 response = self.authorized_client.get(value)
-                self.assertEqual(self.post.id,
-                                 response.context.get('page')[0].id)
-                self.assertEqual(self.post.author,
-                                 response.context.get('page')[0].author)
+                if Post.objects.count() == 1:
+                    self.assertEqual(self.post,
+                                     response.context.get('page')[0])
 
     def test_post_not_in_group2(self):
         """Пост не отображается в другой группе"""
         response_group = self.authorized_client.get(GROUP2)
-        posts_in_group = response_group.context.get('page')
-        self.assertNotIn(self.post, posts_in_group)
+        self.assertNotIn(self.post, response_group.context.get('page'))
+
+    def test_profile_page_show_correct_context(self):
+        """Проверка отображения /<username>/. """
+        response = self.authorized_client.get(PROFILE)
+        self.assertEqual(self.post.author, response.context.get('author'))
 
     def test_post_page_show_correct_context(self):
         """Проверка отображения /<username>/<post_id>/. """
         response = self.authorized_client.get(self.REVERSE_POST)
         self.assertEqual(self.post, response.context.get('post'))
-        self.assertEqual(self.post.author, response.context.get('post').author)
+        self.assertEqual(self.post.author, response.context.get('author'))
 
 
 class PaginatorViewsTest(TestCase):

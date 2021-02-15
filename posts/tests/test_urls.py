@@ -8,6 +8,7 @@ NEW_POST = reverse('posts:new_post')
 AUTHOR = reverse('about:author')
 TECH = reverse('about:tech')
 USERNAME = 'TestAuthor'
+USERNAME2 = 'TestAut'
 AUTH_LOGIN = reverse('login')
 SLUG = 'testgroup'
 GROUP_URL = reverse('posts:group', kwargs={'slug': SLUG})
@@ -35,6 +36,9 @@ class YatubePostsURLTests(TestCase):
         self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
+        self.user2 = User.objects.create(username=USERNAME2)
+        self.authorized_client2 = Client()
+        self.authorized_client2.force_login(self.user2)
 
     def test_urls_uses_correct_template(self):
         template_urls_names = [
@@ -53,55 +57,30 @@ class YatubePostsURLTests(TestCase):
                                         template)
 
     def test_urls_status_code(self):
-        get_urls_names = [
-            [
-                INDEX, self.guest_client, 200
-            ],
-            [
-                NEW_POST, self.guest_client, 302
-            ],
-            [
-                GROUP_URL, self.guest_client, 200
-            ],
-            [
-                self.POST_URL, self.guest_client, 200
-            ],
-            [
-                PROFILE_URL, self.guest_client, 200
-            ],
-            [
-                AUTHOR, self.guest_client, 200
-            ],
-            [
-                TECH, self.guest_client, 200
-            ],
-            [
-                self.POST_EDIT_URL, self.guest_client, 302
-            ],
-            [
-                self.POST_EDIT_URL, self.authorized_client, 200
-            ],
-            [
-                NEW_POST, self.authorized_client, 200
-            ],
+        urls_names = [
+            [self.POST_EDIT_URL, self.authorized_client2, 302],
+            [INDEX, self.guest_client, 200],
+            [NEW_POST, self.guest_client, 302],
+            [GROUP_URL, self.guest_client, 200],
+            [self.POST_URL, self.guest_client, 200],
+            [PROFILE_URL, self.guest_client, 200],
+            [AUTHOR, self.guest_client, 200],
+            [TECH, self.guest_client, 200],
+            [self.POST_EDIT_URL, self.guest_client, 302],
+            [self.POST_EDIT_URL, self.authorized_client, 200],
+            [NEW_POST, self.authorized_client, 200],
         ]
-        for url, client, status in get_urls_names:
+        for url, client, status in urls_names:
             with self.subTest(url=url):
                 self.assertEqual(client.get(url).status_code, status)
 
     def test_redirect_urls_correct(self):
         urls = [
-            [
-                NEW_POST,
-                self.guest_client.get(NEW_POST, follow=True),
-                f'{AUTH_LOGIN}?next={NEW_POST}'
-            ],
-            [
-                self.POST_EDIT_URL,
-                self.guest_client.get(self.POST_EDIT_URL, follow=True),
-                f'{AUTH_LOGIN}?next={self.POST_EDIT_URL}'
-            ],
+            [NEW_POST, self.guest_client, f'{AUTH_LOGIN}?next={NEW_POST}'],
+            [self.POST_EDIT_URL, self.guest_client,
+             f'{AUTH_LOGIN}?next={self.POST_EDIT_URL}'],
+            [self.POST_EDIT_URL, self.authorized_client2, self.POST_URL],
         ]
         for url, client, redirect in urls:
             with self.subTest(url=url):
-                self.assertRedirects(client, redirect)
+                self.assertRedirects(client.get(url, follow=True), redirect)

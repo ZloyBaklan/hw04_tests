@@ -23,23 +23,26 @@ class PostFormTests(TestCase):
             slug='Tests2',
             description='Описание',
         )
-        cls.post = Post.objects.create(
-            author=cls.user,
-            text='Тестовый текст',
-            group=cls.group
-        )
-        cls.POST_URL = reverse(
-            'posts:post',
-            args=[cls.user.username, cls.post.id])
-        cls.POST_EDIT_URL = reverse(
-            'posts:post_edit',
-            args=[cls.user.username, cls.post.id])
 
     def setUp(self):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
+        self.post = Post.objects.create(
+            author=self.user,
+            text='Тестовый текст',
+            group=self.group
+        )
+        self.POST_URL = reverse(
+            'posts:post',
+            args=[self.user.username, self.post.id])
+        self.POST_EDIT_URL = reverse(
+            'posts:post_edit',
+            args=[self.user.username, self.post.id])
 
     def test_post_create(self):
+        post = Post.objects.first()
+        post.delete()
+        post.save()
         form_data = {
             'text': 'Текст формы',
             'group': self.group.id,
@@ -52,7 +55,6 @@ class PostFormTests(TestCase):
         post = response.context['page'][0]
         self.assertEqual(post.text, form_data['text'])
         self.assertEqual(post.group, self.group)
-        self.assertEqual(post.author, self.post.author)
         self.assertRedirects(response, INDEX)
 
     def test_new_post_show_correct_context(self):
