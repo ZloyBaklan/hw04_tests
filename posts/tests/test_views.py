@@ -58,9 +58,9 @@ class YatubePostsTests(TestCase):
         for value in urls_names:
             with self.subTest(value=value):
                 response = self.authorized_client.get(value)
-                if Post.objects.count() == 1:
-                    self.assertEqual(self.post,
-                                     response.context.get('page')[0])
+                self.assertEqual(Post.objects.count(), 1)
+                self.assertEqual(self.post,
+                                 response.context.get('page')[0])
 
     def test_post_not_in_group2(self):
         """Пост не отображается в другой группе"""
@@ -70,7 +70,7 @@ class YatubePostsTests(TestCase):
     def test_profile_page_show_correct_context(self):
         """Проверка отображения /<username>/. """
         response = self.authorized_client.get(PROFILE)
-        self.assertEqual(self.post.author, response.context.get('author'))
+        self.assertEqual(self.user, response.context.get('author'))
 
     def test_post_page_show_correct_context(self):
         """Проверка отображения /<username>/<post_id>/. """

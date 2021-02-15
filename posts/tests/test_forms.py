@@ -42,7 +42,6 @@ class PostFormTests(TestCase):
     def test_post_create(self):
         post = Post.objects.first()
         post.delete()
-        post.save()
         form_data = {
             'text': 'Текст формы',
             'group': self.group.id,
@@ -53,8 +52,10 @@ class PostFormTests(TestCase):
             follow=True
         )
         post = response.context['page'][0]
+        self.assertEqual(Post.objects.count(), 1)
         self.assertEqual(post.text, form_data['text'])
         self.assertEqual(post.group, self.group)
+        self.assertEqual(post.author, self.user)
         self.assertRedirects(response, INDEX)
 
     def test_new_post_show_correct_context(self):
